@@ -12,46 +12,32 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cg.resourcedeploy.ResourceDeployApplication;
-import com.cg.resourcedeploy.dto.EmployeeMasterBean;
+import com.cg.resourcedeploy.dto.EmployeeMasterEntity;
 import com.cg.resourcedeploy.exceptions.ResourceDeployExceptions;
 import com.cg.resourcedeploy.service.IResourceDeployService;
 
 @RestController
 @CrossOrigin
 public class ResouceDeployController {
-	
-	
-	Logger logger=org.slf4j.LoggerFactory.getLogger(ResourceDeployApplication.class);
-	
+
+	Logger logger = org.slf4j.LoggerFactory.getLogger(ResourceDeployApplication.class);
+
 	@Autowired
 	private IResourceDeployService resourceDeployService;
-	
-	@PostMapping(value="/buemployeedata", consumes="application/json" ,produces="application/json")
+
+	@PostMapping(value = "/buemployeedata", consumes = "application/json", produces = "application/json")
 	@ResponseBody
-	public List<Object[]> getBuEmployeeBenchData(@RequestBody EmployeeMasterBean employeeMasterBean) throws ResourceDeployExceptions {
+	public List<Object[]> getBuEmployeeBenchData(@RequestBody EmployeeMasterEntity employeeMasterEntity)
+			throws ResourceDeployExceptions {
 		logger.info("GetBuEmployeeData started");
-		List<Object[]> resource=resourceDeployService.buEmployeeDate(employeeMasterBean);
-		return  resource;
-		
+		List<Object[]> resource = resourceDeployService.buEmployeeDate(employeeMasterEntity);
+		return resource;
+
 	}
-	
-	@GetMapping(value="/benchresourcedata" ,produces="application/json")
+
+	@GetMapping(value = "/completeemployeedetails", produces = "application/json")
 	@ResponseBody
-	public List<Object[]> resourceForDeploy() throws ResourceDeployExceptions{
-		logger.info("BenchResourceData method started");
-		 return resourceDeployService.resourceForDeploy();
-	}
-	
-	@GetMapping(value="/deployedresourcedata", produces="application/json")
-	@ResponseBody
-	public List<Object[]> resourceDeployed() throws ResourceDeployExceptions{
-		logger.info("DeployedResource Method started");
-		return resourceDeployService.resourceDeployed();
-	}
-	
-	@GetMapping(value="/completeemployeedetails", produces="application/json")
-	@ResponseBody
-	public List<Object[]> employeeResources() throws ResourceDeployExceptions{
+	public List<Object[]> employeeResources() throws ResourceDeployExceptions {
 		logger.info(" EmployeeResources Method started");
 		return resourceDeployService.resourcesAvailable();
 	}

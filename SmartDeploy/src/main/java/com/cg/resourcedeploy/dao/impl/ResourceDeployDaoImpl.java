@@ -10,81 +10,61 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cg.resourcedeploy.dao.IResourceDeployDao;
-import com.cg.resourcedeploy.dto.EmployeeMasterBean;
+import com.cg.resourcedeploy.dto.EmployeeMasterEntity;
 import com.cg.resourcedeploy.exceptions.ResourceDeployExceptions;
+import com.cg.resourcedeploy.utility.ResourceDeployMessages;
 
 @Repository
 @Transactional
 public class ResourceDeployDaoImpl implements IResourceDeployDao {
 	static String buEmployee;
+//	List<Object[]> results;
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@Override
-	public List<Object[]> fetchDataByBu(EmployeeMasterBean employeeMasterBean) throws ResourceDeployExceptions {
-		String bu = employeeMasterBean.getBu();
-		System.out.println(bu);
+	public List<Object[]> fetchDataByBu(EmployeeMasterEntity employeeMasterEntity) throws ResourceDeployExceptions {
+		String bu = employeeMasterEntity.getBu();
+		if(bu!=null) {
 		buEmployee = bu;
-		TypedQuery<Object[]> query = entityManager.createQuery(
-				"SELECT SUM(CASE WHEN B.availabilityName='bench_available' THEN 1 ELSE 0 END)"
-						+ " AS Bench, SUM(CASE WHEN B.availabilityName='bench_unavailable' THEN 1 ELSE 0 END) "
-						+ "AS DEPLOYED FROM BenchMasterBean B JOIN EmployeeMasterBean E ON"
-						+ " B.benchAvailabilityId=E.benchMasterBean.benchAvailabilityId" + " WHERE E.bu=: bu1 ",
-				Object[].class);
-		query.setParameter("bu1", employeeMasterBean.getBu());
-		List<Object[]> results = query.getResultList();
-		System.out.println(results);
-		return results;
-
-	}
-
-	@Override
-	public List<Object[]> fetchResourceForDeploying() throws ResourceDeployExceptions {
-
 		TypedQuery<Object[]> query = entityManager
-				.createQuery("SELECT e.empId,e.empName,e.emailId,e.location,g.gradeName "
-						+ "FROM EmployeeMasterBean e join GradeMasterBean g"
-						+ " on e.gradeMasterBean.gradeId=g.gradeId " + "join BenchMasterBean b "
-						+ "on b.benchAvailabilityId=e.benchMasterBean.benchAvailabilityId "
-						+ "WHERE b.availabilityName='bench_available' AND e.bu=: bu2 ", Object[].class);
-		System.out.println(buEmployee);
-		query.setParameter("bu2", buEmployee);
+				.createQuery("SELECT SUM(CASE WHEN bench.availabilityName='bench_available' THEN 1 ELSE 0 END)"
+						+ " AS Bench, SUM(CASE WHEN bench.availabilityName='bench_unavailable' THEN 1 ELSE 0 END) "
+						+ "AS DEPLOYED FROM BenchMasterEntity bench JOIN EmployeeMasterEntity employee ON"
+						+ " bench.benchAvailabilityId=employee.benchMaster.benchAvailabilityId"
+						+ " WHERE employee.bu=: bu1 ", Object[].class);
+		query.setParameter("bu1", employeeMasterEntity.getBu());
 		List<Object[]> results = query.getResultList();
 		return results;
+		}
+		else {
+			throw new ResourceDeployExceptions(ResourceDeployMessages.BU_EMPTY);
+		}
+		
 
 	}
 
-	@Override
-	public List<Object[]> fetchResourcesDeployed() throws ResourceDeployExceptions {
 
-		TypedQuery<Object[]> query = entityManager
-				.createQuery("SELECT e.empId,e.empName,e.emailId,e.location,g.gradeName "
-						+ "FROM EmployeeMasterBean e join GradeMasterBean g"
-						+ " on e.gradeMasterBean.gradeId=g.gradeId " + "join BenchMasterBean b "
-						+ "on b.benchAvailabilityId=e.benchMasterBean.benchAvailabilityId "
-						+ "WHERE b.availabilityName='bench_unavailable' AND e.bu=: bu2 ", Object[].class);
-		System.out.println(buEmployee);
-		query.setParameter("bu2", buEmployee);
-		List<Object[]> results = query.getResultList();
-		System.out.println(results.toString());
-		return results;
-	}
 
 	@Override
 	public List<Object[]> fetchEmployeeResources() throws ResourceDeployExceptions {
 
 		TypedQuery<Object[]> query = entityManager.createQuery(
-				"SELECT e.empId,e.empName,e.emailId,e.location,g.gradeName,b.availabilityName "
-						+ "FROM EmployeeMasterBean e join GradeMasterBean g"
-						+ " on e.gradeMasterBean.gradeId=g.gradeId " + "join BenchMasterBean b "
-						+ "on b.benchAvailabilityId=e.benchMasterBean.benchAvailabilityId " + "WHERE e.bu=: bu2 ",
+				"SELECT employee.empId,employee.empName,employee.emailId,employee.location,grade.gradeName,bench.availabilityName "
+						+ "FROM EmployeeMasterEntity employee join GradeMasterEntity grade"
+						+ " on employee.gradeMaster.gradeId=grade.gradeId " + "join BenchMasterEntity bench "
+						+ "on bench.benchAvailabilityId=employee.benchMaster.benchAvailabilityId "
+						+ "WHERE employee.bu=: bu2 ",
 				Object[].class);
-		System.out.println(buEmployee);
 		query.setParameter("bu2", buEmployee);
-		List<Object[]> results = query.getResultList();
-		System.out.println(results.toString());
+		 List<Object[]> results = query.getResultList();
+		if(results.isEmpty()) {
+			throw new ResourceDeployExceptions(ResourceDeployMessages.BU_EMPTY);
+		}
+		else {
 		return results;
+		}
 	}
 
 }

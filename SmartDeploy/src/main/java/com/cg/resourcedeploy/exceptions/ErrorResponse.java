@@ -3,16 +3,16 @@ package com.cg.resourcedeploy.exceptions;
 public class ErrorResponse {
 
 	private String errorMessage;
+
 	private String callerURL;
-
-	public ErrorResponse(String message, String description) {
-
+	
+	public ErrorResponse(String errorMessage, String callerURL) {
+		super();
+		this.errorMessage = errorMessage;
+		this.callerURL = callerURL;
 	}
 
-	public ErrorResponse() {
-
-	}
-
+	
 	public String getCallerURL() {
 		return callerURL;
 	}
